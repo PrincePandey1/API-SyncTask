@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.Settings.Global.getString
 import android.util.Log
 import androidx.core.content.res.TypedArrayUtils.getString
+import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.DataOutputStream
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                 connection.doOutput = true
 
                 //To post a Request to the server
-                connection.instanceFollowRedirects = false //It is used such tha t No other webpage opens during the start of application
+                connection.instanceFollowRedirects = false //It is used such that No other webpage opens during the start of application
                 //Request Method
                 connection.requestMethod = "POST"
                 connection.setRequestProperty("Content-Type" , "application/json")
@@ -56,6 +57,7 @@ class MainActivity : AppCompatActivity() {
 
                 connection.useCaches = false
 
+                //Used to post data on server
                 val writeDataOutputStream = DataOutputStream(connection.outputStream)
                 val jsonObject = JSONObject()
                 jsonObject.put("username" , user)
@@ -108,7 +110,27 @@ class MainActivity : AppCompatActivity() {
             super.onPostExecute(result)
             Log.i("JSON RESPONSE RESULT", result)
 
-            val jsonObject = JSONObject(result)
+            val responseData = Gson().fromJson(result,ResponseData::class.java)
+            Log.i("Message",responseData.message)
+            Log.i("User Id","${responseData.user_id}")
+            Log.i("Name",responseData.name)
+            Log.i("Email",responseData.email)
+            Log.i("Mobile","${responseData.mobile}")
+
+            // Fetched another jsonObject from GSON responseData
+            Log.i("Profile Completed" , "${responseData.profile_details.is_profile_completed}")
+            Log.i("Rating" , "${responseData.profile_details.rating}")
+
+            // Fetched JsonArray from another JSON Object
+            Log.i("Datalistdetail" , "${responseData.data_list.size}")
+            for (item in responseData.data_list.indices){
+                Log.i("Value $item"  , "${responseData.data_list[item]}")
+                Log.i("ID","${responseData.data_list[item].id}")
+                Log.i("value", responseData.data_list[item].value)
+            }
+
+
+          /*  val jsonObject = JSONObject(result)
             val name = jsonObject.optString("message")
             val Name = jsonObject.optString("name")
             val user = jsonObject.optInt("User")
@@ -138,7 +160,7 @@ class MainActivity : AppCompatActivity() {
 
                  val Value = dataItemObject.optString("value")
                  Log.i("Value", "$Value")
-             }
+             }*/
         }
 
 
